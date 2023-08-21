@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mesum.showtimes.ui.theme.MovieViewModel
 import com.mesum.showtimes.ui.theme.ShowTimesTheme
+import com.mesum.showtimes.ui.theme.TrendingMoviesScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,29 +26,22 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    TrendingMoviesScreen("Android")
                 }
+
+
+
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
 
-    val viewModel: MovieViewModel = viewModel()
-    val trendingMoviesState = viewModel.trendingMoviesState.collectAsState()
-
-    Text(
-        text = trendingMoviesState.value.results.size.toString(),
-        modifier = modifier
-    )
-}
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ShowTimesTheme {
-        Greeting("Android")
+        TrendingMoviesScreen("Android")
     }
 }
