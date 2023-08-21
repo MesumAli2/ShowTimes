@@ -22,22 +22,17 @@ class MovieViewModel() : ViewModel() {
     private var currentTrendingPage = 1 // Keep track of the current page
 
     init {
-
         fetchTrendingMovies()
     }
     fun fetchTrendingMovies(apiKey: String = "72a92a904702629a345d21c3e4fe58ed") {
 
-        Log.d("CurrentPage","${currentTrendingPage.toString()}")
         viewModelScope.launch {
-
             val result = movieRepository.getTrendingMovies(apiKey, currentTrendingPage)
-
             val currentList = trendingMoviesState.value
-
                 val updatedList = currentList + result.results
                 currentTrendingPage++
                 _trendingMoviesState.value = updatedList
-
         }
+
     }
 }

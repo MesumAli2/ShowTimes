@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.mesum.showtimes.data.Result
 
@@ -32,12 +34,12 @@ fun TrendingMoviesScreen(name: String, modifier: Modifier = Modifier) {
 
 
 
-    LazyVerticalGrid(columns = GridCells.Fixed(2)) {
+    LazyVerticalGrid(columns = GridCells.Fixed(2) ) {
         items(movieList.size) {
             if (it == movieList.size -1 ){
-                Toast.makeText(LocalContext.current, "reachedEnd", Toast.LENGTH_LONG).show()
                 viewModel.fetchTrendingMovies()
             }
+
             MovieGridItem(movie = movieList[it])
 
         }
@@ -57,9 +59,8 @@ fun MovieGridItem(movie: Result) {
             .fillMaxWidth()
     ) {
 
-
-
-        AsyncImage(model ="https://image.tmdb.org/t/p/w500/${movie.poster_path}" , contentDescription = null)
+        SubcomposeAsyncImage(model ="https://image.tmdb.org/t/p/w500/${movie.poster_path}" ,
+            contentDescription = null, loading = { CircularProgressIndicator()})
 //        Image(
 //            painter = rememberImagePainter(movie.posterPath),
 //            contentDescription = movie.title,
