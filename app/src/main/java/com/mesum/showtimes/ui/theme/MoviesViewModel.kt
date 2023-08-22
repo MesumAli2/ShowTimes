@@ -1,6 +1,7 @@
 package com.mesum.showtimes.ui.theme
 
 import android.util.Log
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mesum.showtimes.data.MovieRepository
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
 
 class MovieViewModel() : ViewModel() {
 
-     private val movieRepository: MovieRepository = MovieRepository()
+    var selectedTabIndex:MutableLiveData<Int>  = MutableLiveData(0)
+    private val movieRepository: MovieRepository = MovieRepository()
     private val _trendingMoviesState: MutableStateFlow<List<com.mesum.showtimes.data.Result>> = MutableStateFlow(
         listOf()
     )

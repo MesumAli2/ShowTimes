@@ -15,11 +15,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun TrendingMoviesScreen() {
+fun UpcomingMoviesScreen ()
+{
 
     val viewModel: MovieViewModel = viewModel()
-    val trendingMoviesState by viewModel.trendingMoviesState.collectAsState()
-    val movieList = trendingMoviesState
+    val upcomingMoviesState by viewModel.upcomingMoviesState.collectAsState()
+    viewModel.fetchUpcomingMovies()
+    val movieList = upcomingMoviesState
 
     val configuration = LocalConfiguration.current
     when(configuration.orientation) {
