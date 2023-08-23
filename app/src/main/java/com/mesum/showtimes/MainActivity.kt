@@ -24,7 +24,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MoviesAndTvShowsScreen(this as LifecycleOwner)
+
+
+                    ShowTimeApp()
                 }
 
 
@@ -36,10 +38,10 @@ class MainActivity : ComponentActivity() {
 
 
 
+
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ShowTimesTheme {
-        TrendingMoviesScreen()
     }
 }

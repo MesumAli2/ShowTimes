@@ -13,9 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mesum.showtimes.data.Result
 
 @Composable
-fun TrendingMoviesScreen() {
+fun TrendingMoviesScreen(onMovieClicked: () -> Unit, video: (Result) -> Unit) {
 
     val viewModel: MovieViewModel = viewModel()
     val trendingMoviesState by viewModel.trendingMoviesState.collectAsState()
@@ -38,7 +39,7 @@ fun TrendingMoviesScreen() {
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it])
+                    MovieGridItem(movie = movieList[it], onClick = onMovieClicked, video = video)
                 }
             }
         }
@@ -56,7 +57,8 @@ fun TrendingMoviesScreen() {
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it])
+
+                    MovieGridItem(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }
@@ -76,7 +78,7 @@ fun TrendingMoviesScreen() {
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it])
+                    MovieGridItem(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }

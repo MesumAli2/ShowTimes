@@ -1,7 +1,6 @@
 package com.mesum.showtimes.ui.theme
 
 import android.content.res.Configuration
-import android.webkit.WebView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -14,9 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mesum.showtimes.data.Result
 
 @Composable
-fun UpcomingMoviesScreen ()
+fun UpcomingMoviesScreen(onMovieClicked: () -> Unit, video: (Result) -> Unit)
 {
 
     val viewModel: MovieViewModel = viewModel()
@@ -42,7 +42,7 @@ fun UpcomingMoviesScreen ()
                     }
 
 
-                    MovieGridItem(movie = movieList[it])
+                    MovieGridItem(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }
@@ -60,7 +60,7 @@ fun UpcomingMoviesScreen ()
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it])
+                    MovieGridItem(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }
@@ -80,7 +80,7 @@ fun UpcomingMoviesScreen ()
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it])
+                    MovieGridItem(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }

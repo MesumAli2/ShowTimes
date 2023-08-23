@@ -1,7 +1,7 @@
 package com.mesum.showtimes.data
 
 data class Result(
-    val adult: Boolean,
+    val adult: Boolean ,
     val backdrop_path: String,
     val genre_ids: List<Int>,
     val id: Int,

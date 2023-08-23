@@ -12,6 +12,7 @@ import com.mesum.showtimes.data.Tvs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
@@ -44,7 +45,20 @@ class MovieViewModel() : ViewModel() {
         listOf()
     )
     val trendingTvState: StateFlow<List<Tvs>> = _trendingTvState.asStateFlow()
+    private val _uiState = MutableStateFlow(Result(adult = false, backdrop_path = "", genre_ids = listOf(), id = 0,
+         media_type = "", original_language= "",
+     original_title= "",
+     overview = "",
+     popularity = 0.0,
+     poster_path= "",
+     release_date = "",
+     title= "",
+     video = false,
+     vote_average = 0.0,
+     vote_count = 0
 
+        ))
+    val uiState: StateFlow<Result> = _uiState.asStateFlow()
 
     private var currentTrendingPage = 1 // Keep track of the current page
     private var upcomingPage = 1 // Keep track of the current page
@@ -108,6 +122,12 @@ class MovieViewModel() : ViewModel() {
             _trendingTvState.value = updatedList
         }
 
+    }
+
+    fun updatedTrailer(result: Result) {
+
+        Log.d("result", result.toString())
+        _uiState.value = result
     }
 
 

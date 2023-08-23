@@ -13,9 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.mesum.showtimes.data.Result
 
 @Composable
-fun TopRateMoviesScreen()
+fun TopRateMoviesScreen(onMovieClicked: () -> Unit, video: (Result) -> Unit)
 {
 
     val viewModel: MovieViewModel = viewModel()
@@ -40,7 +41,7 @@ fun TopRateMoviesScreen()
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it])
+                    MovieGridItem(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }
@@ -58,7 +59,7 @@ fun TopRateMoviesScreen()
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it])
+                    MovieGridItem(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }
@@ -78,7 +79,7 @@ fun TopRateMoviesScreen()
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it])
+                    MovieGridItem(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }
