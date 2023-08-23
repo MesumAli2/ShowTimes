@@ -1,6 +1,7 @@
 package com.mesum.showtimes.ui.theme
 
 import android.content.res.Configuration
+import android.webkit.WebView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -39,6 +40,7 @@ fun UpcomingMoviesScreen ()
                     if (it == movieList.size - 1) {
                         viewModel.fetchTrendingMovies()
                     }
+
 
                     MovieGridItem(movie = movieList[it])
                 }

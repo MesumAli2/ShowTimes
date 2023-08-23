@@ -18,6 +18,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -39,37 +41,39 @@ fun MoviesAndTvShowsScreen(lifecycle: LifecycleOwner) {
     }
     Column(modifier = Modifier.fillMaxWidth()) {
 
+        Row {
 
 
+        Image(modifier = Modifier.align(CenterVertically).padding(start = 10.dp)
+            .width(30.dp)
+            .height(30.dp), painter = painterResource(id = com.mesum.showtimes.R.drawable.app_icon), contentDescription = null)
+            Spacer(modifier = Modifier.width(16.dp)) // Add spacing between logo and tabs
 
 
-//        Image(modifier = Modifier
-//            .width(50.dp)
-//            .height(50.dp), painter = painterResource(id = com.mesum.showtimes.R.drawable.app_icon), contentDescription = null)
+            ScrollableTabRow(
+                selectedTabIndex = selectedTabIndex,
+                modifier = Modifier.fillMaxWidth(),
+                edgePadding = 8.dp// Don't specify the TabRow's height!
+            ) {
 
 
-        ScrollableTabRow(
-            selectedTabIndex = selectedTabIndex,
-            modifier = Modifier.fillMaxWidth(),
-            edgePadding = 8.dp// Don't specify the TabRow's height!
-        ) {
-
-
-            tabs.forEachIndexed { i, text ->
-                Tab(
-                    selected = selectedTabIndex == i,
-                    onClick = { selectedTabIndex = i },
-                    modifier = Modifier.height(50.dp), // Specify the Tab's height instead
-                    text = { Text(text) }
-                )
+                tabs.forEachIndexed { i, text ->
+                    Tab(
+                        selected = selectedTabIndex == i,
+                        onClick = { selectedTabIndex = i },
+                        modifier = Modifier.height(50.dp), // Specify the Tab's height instead
+                        text = { Text(text) }
+                    )
+                }
             }
+
         }
 
         when(selectedTabIndex){
             0 -> TrendingMoviesScreen()
             1 -> UpcomingMoviesScreen()
-            3 -> PopularMoviesScreen()
-            4 -> TopRateMoviesScreen()
+            2 -> PopularMoviesScreen()
+            3 -> TopRateMoviesScreen()
         }
 
         }
@@ -94,14 +98,7 @@ fun MovieGridItem(movie: Result) {
 
         SubcomposeAsyncImage(model ="https://image.tmdb.org/t/p/w500/${movie.poster_path}" ,
             contentDescription = null, loading = { CircularProgressIndicator()})
-//        Image(
-//            painter = rememberImagePainter(movie.posterPath),
-//            contentDescription = movie.title,
-//            modifier = Modifier
-//                .size(150.dp)
-//                .clip(RoundedCornerShape(8.dp))
-//                .background(Color.Gray)
-//        )
+
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = movie.title,
