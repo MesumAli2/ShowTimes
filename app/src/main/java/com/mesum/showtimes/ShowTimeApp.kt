@@ -41,7 +41,10 @@ fun ShowTimeApp() {
 
         composable(route = ShowTime.Trailer.name) {
 
-            TrailerScreen(viewModel)
+            TrailerScreen(viewModel, videoString = { videoString ->
+                Log.d("VideoString", videoString)
+                viewModel.fetchVideo(videoString)
+            })
 
         }
 
