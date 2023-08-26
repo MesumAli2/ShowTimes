@@ -24,5 +24,5 @@ We reserve the right to update this Privacy Policy as necessary. Any changes wil
 
 Contact Us
 
-If you have any questions or concerns regarding this Privacy Policy, please contact us at [your contact email address].
+If you have any questions or concerns regarding this Privacy Policy, please contact us at [flimflix.admin@flim-flix.com].
 
