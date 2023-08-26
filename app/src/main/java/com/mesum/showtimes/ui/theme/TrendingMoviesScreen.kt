@@ -26,7 +26,6 @@ fun TrendingMoviesScreen(onMovieClicked: () -> Unit, video: (Result) -> Unit) {
     when(configuration.orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> {
 
-
             LazyVerticalGrid(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -39,7 +38,7 @@ fun TrendingMoviesScreen(onMovieClicked: () -> Unit, video: (Result) -> Unit) {
                         viewModel.fetchTrendingMovies()
                     }
 
-                    MovieGridItem(movie = movieList[it], onClick = onMovieClicked, video = video)
+                    MovieGridItem(movie = movieList[it], onClick = { onMovieClicked }, video = video)
                 }
             }
         }

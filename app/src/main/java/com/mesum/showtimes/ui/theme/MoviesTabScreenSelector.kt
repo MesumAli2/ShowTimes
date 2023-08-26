@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -123,7 +124,7 @@ fun MovieGridItem(movie: Result, onClick: () -> Unit, video: (Result) -> Unit) {
     // Customize the UI for each movie item in the grid here
     Column(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(8.dp, bottom = 12.dp)
             .fillMaxWidth()
             .clickable { onClick()
             video(movie)
@@ -133,6 +134,7 @@ fun MovieGridItem(movie: Result, onClick: () -> Unit, video: (Result) -> Unit) {
         SubcomposeAsyncImage(model ="https://image.tmdb.org/t/p/w500/${movie.poster_path}" ,
             contentDescription = null, loading = { CircularProgressIndicator()})
         var currentRating by remember { mutableStateOf(0f) }
+        Spacer(modifier = Modifier.height(4.dp))
 
         RatingBar(
             rating = movie.vote_average.toFloat(),
@@ -141,10 +143,14 @@ fun MovieGridItem(movie: Result, onClick: () -> Unit, video: (Result) -> Unit) {
                 currentRating = newRating
             }
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = movie.title,
-            style = TextStyle(fontWeight = FontWeight.Bold)
+            style = TextStyle(fontWeight = FontWeight.Bold),
+            modifier = Modifier.fillMaxWidth().padding(4.dp),
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.ExtraBold
         )
     }
 }
@@ -165,10 +171,9 @@ fun RatingBar(
             Icon(
                 imageVector = if (i <= convertedRating) Icons.Filled.Star else Icons.Default.Star,
                 contentDescription = null,
-                tint = if (i <= convertedRating) Color.Yellow else Color.Gray,
+                tint = if (i <= convertedRating) Color(0xFFFFC107) else  Color(0xFFE0E0E0),
                 modifier = Modifier
-                    .clickable { onRatingChanged(i.toFloat() * 2) } // Convert back to 0-10 range
-                    .padding(4.dp)
+                    .clickable { onRatingChanged(i.toFloat() * 2) }.padding(4.dp) // Convert back to 0-10 range
             )
         }
     }
