@@ -1,7 +1,10 @@
 package com.mesum.showtimes
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,8 +17,9 @@ import com.mesum.showtimes.ui.theme.MovieViewModel
 import com.mesum.showtimes.ui.theme.MoviesAndTvShowsScreen
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ShowTimeApp() {
+fun ShowTimeApp(paddingValues: PaddingValues) {
     val viewModel : MovieViewModel = viewModel()
 
     val navController = rememberNavController()
@@ -39,11 +43,11 @@ fun ShowTimeApp() {
            })
         }
 
-        composable(route = ShowTime.Trailer.name) {
 
+        composable(route = ShowTime.Trailer.name) {
             TrailerScreen(viewModel, videoString = { videoString ->
                 Log.d("VideoString", videoString)
-                viewModel.fetchVideo(videoString)
+             //   viewModel.fetchVideo(videoString)
             })
 
         }

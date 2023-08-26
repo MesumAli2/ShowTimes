@@ -1,6 +1,7 @@
 package com.mesum.showtimes
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Build
 import android.util.Log
 import android.view.ViewGroup
@@ -41,72 +42,75 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TrailerScreen(viewModel: MovieViewModel, videoString: (String) -> Unit) {
     val videoDetails by viewModel.uiState.collectAsState()
-    //sets the youtube tile to this callback variable
+
     videoString(videoDetails.original_title.toString())
 
-    val dateSt = videoDetails.release_date.toString()
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val formattedDate = LocalDate.parse(dateSt, dateFormatter) // Use LocalDate instead of LocalDateTime
-    val res = DateTimeFormatter.ofPattern("MMMM dd, yyyy ").format(formattedDate) // August 04, 2017
-
+    val formattedDate = formatDate(videoDetails.release_date.toString())
     Column {
-        YoutubeScreen(videoId = videoDetails.videoId.toString(), modifier = Modifier)
-        Text(text = res, fontSize = 11.sp, textAlign = TextAlign.End, modifier = Modifier.align(Alignment.End).padding(end = 16.dp))
-        Text(text = videoDetails.original_title.toString(), fontSize = 20.sp, modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 16.dp, end = 16.dp), fontWeight = FontWeight.Bold)
-        Text(text = videoDetails.overview.toString(), fontSize = 18.sp, modifier = Modifier.padding(start = 16.dp, end = 16.dp))
+        YoutubeScreen(videoId = videoDetails.videoId.toString())
+        Text(
+            text = formattedDate,
+            fontSize = 11.sp,
+            textAlign = TextAlign.End,
+            modifier = Modifier.align(Alignment.End).padding(end = 16.dp)
+        )
+        Text(
+            text = videoDetails.original_title.toString(),
+            fontSize = 20.sp,
+            modifier = Modifier.padding(16.dp),
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = videoDetails.overview.toString(),
+            fontSize = 18.sp,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
     }
 }
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun YoutubeScreen(
-    videoId: String,
-    modifier: Modifier
-) {
-    val ctx = LocalContext.current
-    AndroidView(factory = {
-        val view = YouTubePlayerView(it)
-        val fragment = view.addYouTubePlayerListener(
-            object : AbstractYouTubePlayerListener() {
-                override fun onReady(youTubePlayer: YouTubePlayer) {
-                    super.onReady(youTubePlayer)
-                    youTubePlayer.loadVideo(videoId, 0f)
-                }
-            }
-        )
-        view
-    },
-        update = {
-            val view = it
-            val fragment = view.addYouTubePlayerListener(
-                object : AbstractYouTubePlayerListener() {
-                    override fun onReady(youTubePlayer: YouTubePlayer) {
-                        super.onReady(youTubePlayer)
-                        youTubePlayer.loadVideo(videoId, 0f)
-                    }
-
-                    override fun onError(
-                        youTubePlayer: YouTubePlayer,
-                        error: PlayerConstants.PlayerError
-                    ) {
-                        super.onError(youTubePlayer, error)
-                    }
-                }
-            )
-            view
-        }
-
-    )
+fun formatDate(dateString: String): String {
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val formattedDate = LocalDate.parse(dateString, dateFormatter)
+    return DateTimeFormatter.ofPattern("MMMM dd, yyyy ").format(formattedDate)
 }
 
+@Composable
+fun YoutubeScreen(videoId: String) {
+    val ctx = LocalContext.current
+    AndroidView(factory = { createYouTubePlayerViewFactory(ctx, videoId) }) {
+        updateYouTubePlayerView(it, videoId)
+    }
+}
 
+private fun createYouTubePlayerViewFactory(context: Context, videoId: String): YouTubePlayerView {
+    val view = YouTubePlayerView(context)
+    val fragment = view.addYouTubePlayerListener(
+        object : AbstractYouTubePlayerListener() {
+            override fun onReady(youTubePlayer: YouTubePlayer) {
+                super.onReady(youTubePlayer)
+                youTubePlayer.loadVideo(videoId, 0f)
+            }
+        }
+    )
+    return view
+}
 
-
+private fun updateYouTubePlayerView(view: YouTubePlayerView, videoId: String) {
+    val fragment = view.addYouTubePlayerListener(
+        object : AbstractYouTubePlayerListener() {
+            override fun onReady(youTubePlayer: YouTubePlayer) {
+                super.onReady(youTubePlayer)
+                youTubePlayer.loadVideo(videoId, 0f)
+            }
+        }
+    )
+}
 
 
 
