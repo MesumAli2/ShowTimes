@@ -192,8 +192,15 @@ class MovieViewModel() : ViewModel() {
         viewModelScope.launch {
             try {
                 val currentKeyword = _stringState.value
+                if (query == currentKeyword) {
+                    searchPage++
+                    Log.d("CurrentWordCheck", "its a old page but paginating")
+                } else {
+                    searchPage = 1
+                    Log.d("CurrentWordCheck", "its a new page ")
 
-                Log.d("SearchMoviesCalled", query.toString())
+                }
+
 
                 val result = movieRepository.searchMovies(
                     currentTrendingPage = searchPage,
@@ -208,11 +215,7 @@ class MovieViewModel() : ViewModel() {
                 }
                 Log.d("SearchText", _searchMoviesState.value.toString())
 
-                if (query == currentKeyword) {
-                    searchPage++
-                } else {
-                    searchPage = 1
-                }
+
                 _searchMoviesState.value = updatedList
                 _stringState.value = query
 

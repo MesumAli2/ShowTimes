@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,8 +33,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
@@ -52,6 +55,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mesum.showtimes.data.toResult
 import com.mesum.showtimes.ui.theme.MovieViewModel
 import com.mesum.showtimes.ui.theme.PopularMoviesScreen
+import com.mesum.showtimes.ui.theme.SearchBar
 import com.mesum.showtimes.ui.theme.SearchMoviesScreen
 import com.mesum.showtimes.ui.theme.ShowTimesTheme
 import com.mesum.showtimes.ui.theme.TopRateMoviesScreen
@@ -61,7 +65,9 @@ import com.mesum.showtimes.ui.theme.UpcomingMoviesScreen
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("StateFlowValueCalledInComposition")
-    @OptIn(ExperimentalMaterial3Api::class)
+    @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+        ExperimentalComposeUiApi::class
+    )
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,9 +91,26 @@ class MainActivity : ComponentActivity() {
                         BottomNavigation(navController, viewModel)
                     },
                         topBar = {
-                            
+                            var isSearchBarVisible by remember { mutableStateOf(false) }
 
+                            if (isSearchBarVisible) {
+                                val textSearchObservable by viewModel.stringValue.collectAsState()
 
+                                SearchBar(
+                                    searchText = textSearchObservable,
+                                    onSearchTextChanged = { query ->
+                                        viewModel.searchMovies(query = query)
+                                    },
+                                    onClearClick = {
+                                        // Handle clear click
+                                        isSearchBarVisible = false
+                                        navController.navigateUp()
+                                    },
+                                    onNavigateBack = {
+                                        isSearchBarVisible = false
+                                    }
+                                )
+                            } else {
                                 TopAppBar(
                                     title = {
                                         Text(
@@ -95,7 +118,8 @@ class MainActivity : ComponentActivity() {
                                             fontFamily = FontFamily.SansSerif,
                                             fontWeight = FontWeight.Light
                                         )
-                                    }, navigationIcon = {
+                                    },
+                                    navigationIcon = {
                                         IconButton(onClick = {}) {
                                             Icon(
                                                 painter = painterResource(id = R.drawable.app_icon),
@@ -105,20 +129,21 @@ class MainActivity : ComponentActivity() {
                                                     .width(24.dp)
                                             )
                                         }
-
                                     },
                                     actions = {
                                         Icon(
                                             imageVector = Icons.Default.Search,
                                             contentDescription = "",
                                             modifier = Modifier.clickable {
-                                                navController.navigate(route = Movies.SearchScreen.name)
-                                                Log.d("ClickedNow", "I am Clicked")
-                                            })
+                                                isSearchBarVisible = true
+                                                // You might want to navigate here if needed
+                                               navController.navigate(route = Movies.SearchScreen.name)
+                                            }
+                                        )
                                     }
                                 )
-
-                    }){
+                            }
+                        }){
 
                         NavHost(
                             navController = navController,
