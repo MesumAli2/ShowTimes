@@ -1,23 +1,12 @@
 package com.mesum.showtimes.data
 
-import android.net.Uri
 import android.util.Log
+import com.mesum.showtimes.data.search.MovieResponse
 import com.mesum.showtimes.network.MovieApiService
 import com.mesum.showtimes.network.RetrofitInstance
-import com.mesum.showtimes.network.RetrofitInstance.retrofit
-import com.mesum.showtimes.network.YoutubeApi
-import com.mesum.showtimes.network.YoutubeApi.retrofitYoutube
-import com.mesum.showtimes.network.YoutubeCaller
-import com.mesum.showtimes.ui.theme.MovieViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
 import retrofit2.HttpException
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
 
 
 class MovieRepository {
@@ -73,7 +62,6 @@ class MovieRepository {
         }
     }
 
-
     suspend fun getTrendingTvs(currentTrendingPage: Int): TvResult {
         return withContext(Dispatchers.IO) {
             try {
@@ -84,6 +72,21 @@ class MovieRepository {
             }
         }
     }
+    suspend fun searchMovies(currentTrendingPage: Int, query : String): SearchMovies{
+        return withContext(Dispatchers.IO){
+            try {
+                val response = movieApiService.searchMoviess(apiKey = apiKey, page =currentTrendingPage, query = query )
+                Log.d("RespSearch", response.toString())
+
+                response
+            }catch (e : HttpException){
+                Log.d("RespSearch", "Error response ${e.toString().toString()}")
+
+                SearchMovies(0, listOf(),0,0)
+            }
+        }
+    }
+
 
 //    suspend fun getVideo(query : String) : YoutubeResult{
 //        return withContext(Dispatchers.Main){

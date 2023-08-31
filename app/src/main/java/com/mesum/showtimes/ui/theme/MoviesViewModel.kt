@@ -1,30 +1,36 @@
 package com.mesum.showtimes.ui.theme
 
-import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mesum.showtimes.data.MovieRepository
-import com.mesum.showtimes.data.Movies
 import com.mesum.showtimes.data.PageInfo
 import com.mesum.showtimes.data.Result
-import com.mesum.showtimes.data.TvResult
+import com.mesum.showtimes.data.ResultX
+import com.mesum.showtimes.data.SearchMovies
 import com.mesum.showtimes.data.Tvs
 import com.mesum.showtimes.data.YoutubeResult
+import com.mesum.showtimes.data.search.Movie
+import com.mesum.showtimes.data.search.MovieResponse
 import com.mesum.showtimes.network.MovieApiService
 import com.mesum.showtimes.network.YoutubeApi
-import com.mesum.showtimes.network.YoutubeCaller
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.Exception
 
 
@@ -61,6 +67,11 @@ class MovieViewModel() : ViewModel() {
         listOf()
     )
     val trendingTvState: StateFlow<List<Tvs>> = _trendingTvState.asStateFlow()
+    private val _searchMoviesState: MutableStateFlow<List<ResultX>?> =
+        MutableStateFlow(
+            listOf()
+        )
+    val searchMoviesState: StateFlow<List<ResultX>?> = _searchMoviesState.asStateFlow()
     var youtubeid: YoutubeResult = YoutubeResult(
         etag = "",
         items = listOf(),
@@ -87,8 +98,13 @@ class MovieViewModel() : ViewModel() {
 
         )
     )
-    private val _stringState = MutableStateFlow<String>("Hello")
+    private val _stringState = MutableStateFlow<String>("")
     val stringState = _stringState.asStateFlow()
+    val stringValue = MutableStateFlow<String>("")
+
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching = _isSearching.asStateFlow()
 
     val uiState: StateFlow<Result> = _uiState.asStateFlow()
     private val _youtubeState = MutableLiveData<YoutubeResult>()
@@ -100,52 +116,110 @@ class MovieViewModel() : ViewModel() {
     private var upcomingPage = 1 // Keep track of the current page
     private var popularPage = 1 // Keep track of the current page
     private var topRatedPage = 1 // Keep track of the current page
+    private var searchPage = 1
 
 
     init {
         fetchTrendingMovies()
+
     }
 
     fun fetchTrendingMovies() {
         viewModelScope.launch {
-            val result = movieRepository.getTrendingMovies(currentTrendingPage)
-            val currentList = trendingMoviesState.value
-            val updatedList = currentList + result.results
-            currentTrendingPage++
-            _trendingMoviesState.value = updatedList
+            try {
+                val result = movieRepository.getTrendingMovies(currentTrendingPage)
+                val currentList = trendingMoviesState.value
+                val updatedList = currentList + result.results
+                currentTrendingPage++
+                _trendingMoviesState.value = updatedList
+            }catch (e : Exception){
+                Log.d("ExceptionIs", e.message.toString())
+
+            }
         }
     }
 
     fun fetchUpcomingMovies() {
         viewModelScope.launch {
-            val result = movieRepository.getUpcomingMovies(upcomingPage)
-            val currentList = upcomingMoviesState.value
-            val updatedList = currentList + result.results
-            upcomingPage++
-            _upcomingMoviesState.value = updatedList
+            try {
+                val result = movieRepository.getUpcomingMovies(upcomingPage)
+                val currentList = upcomingMoviesState.value
+                val updatedList = currentList + result.results
+                upcomingPage++
+                _upcomingMoviesState.value = updatedList
+            }catch (e: Exception){
+                Log.d("ExceptionIs", e.message.toString())
+
+            }
         }
     }
 
+
     fun fetchPopularMovies() {
         viewModelScope.launch {
-            val result = movieRepository.getPopularMovies(popularPage)
-            val currentList = popularMoviesState.value
-            val updatedList = currentList + result.results
-            popularPage++
-            _popularMoviesState.value = updatedList
+            try {
+                val result = movieRepository.getPopularMovies(popularPage)
+                val currentList = popularMoviesState.value
+                val updatedList = currentList + result.results
+                popularPage++
+                _popularMoviesState.value = updatedList
+            }catch (e : Exception){
+                Log.d("ExceptionIs", e.message.toString())
+
+            }
         }
 
     }
 
     fun fetchTopRatedMovies() {
         viewModelScope.launch {
-            val result = movieRepository.getTopRatedMovies(topRatedPage)
-            val currentList = topRatedMoviesState.value
-            val updatedList = currentList + result.results
-            topRatedPage++
-            _topRatedMoviesState.value = updatedList
+            try {
+                val result = movieRepository.getTopRatedMovies(topRatedPage)
+                val currentList = topRatedMoviesState.value
+                val updatedList = currentList + result.results
+                topRatedPage++
+                _topRatedMoviesState.value = updatedList
+            }catch (e : Exception){
+                Log.d("ExceptionIs", e.message.toString())
+            }
         }
 
+    }
+
+    fun searchMovies(query: String) {
+
+        stringValue.value = query
+        viewModelScope.launch {
+            try {
+                val currentKeyword = _stringState.value
+
+                Log.d("SearchMoviesCalled", query.toString())
+
+                val result = movieRepository.searchMovies(
+                    currentTrendingPage = searchPage,
+                    query = query
+                )
+
+                val currentList = _searchMoviesState.value.orEmpty()
+                val updatedList = if (query == currentKeyword) {
+                    currentList + result.results
+                } else {
+                    result.results
+                }
+                Log.d("SearchText", _searchMoviesState.value.toString())
+
+                if (query == currentKeyword) {
+                    searchPage++
+                } else {
+                    searchPage = 1
+                }
+                _searchMoviesState.value = updatedList
+                _stringState.value = query
+
+            } catch (e: Exception) {
+                Log.d("MoviesResponse", e.message.toString())
+            }
+        }
     }
 
     fun fetchTrendingTvShows() {
@@ -162,20 +236,19 @@ class MovieViewModel() : ViewModel() {
 
     fun fetchVideo(query: String) {
 
-
-
-        service.getVideo(query, "AIzaSyDqX8axTGeNpXRiISTGL7Tya7fjKJDYi4g")
+        service.getVideo(query, "AIzaSyBrnOFGEMUW4EDzAVQZheB3mSEPxwJdt9g")
             .enqueue(object : Callback<YoutubeResult> {
                 override fun onResponse(
                     call: Call<YoutubeResult>,
                     response: Response<YoutubeResult>
                 ) {
-                    Log.d("VideoFetched", response.body().toString())
-                    _youtubeState.value = response.body()
-
-                    response.body().let { _youtubeState.value }
-                    _uiState.update {
-                        it.copy(videoId = response.body()?.items?.get(0)?.id?.videoId.toString())
+                    if (response.isSuccessful) {
+                        Log.d("VideoFetched", response.body().toString())
+                        _youtubeState.value = response.body()
+                        response.body().let { _youtubeState.value }
+                        _uiState.update {
+                            it.copy(videoId = response.body()?.items?.get(0)?.id?.videoId.toString())
+                        }
                     }
                 }
 
@@ -188,7 +261,6 @@ class MovieViewModel() : ViewModel() {
 
 
     fun updatedTrailer(result: Result) {
-
         Log.d("result", result.toString())
         _uiState.value = result
     }
@@ -202,6 +274,9 @@ class MovieViewModel() : ViewModel() {
     fun changeString(word: String){
         _stringState.value = word
 
+    }
+    fun onSearchTextChange(text : String){
+        _stringState.value =text
     }
 
 }

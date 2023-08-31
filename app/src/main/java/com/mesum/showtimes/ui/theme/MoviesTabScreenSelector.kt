@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.SubcomposeAsyncImage
 import com.mesum.showtimes.data.Result
-
+import com.mesum.showtimes.data.ResultX
 
 
 @Composable
@@ -154,6 +154,42 @@ fun MovieGridItem(movie: Result, onClick: () -> Unit, video: (Result) -> Unit) {
         )
     }
 }
+@Composable
+fun MovieGridItemX(movie: ResultX, onClick: () -> Unit, video: (ResultX) -> Unit) {
+    // Customize the UI for each movie item in the grid here
+    Column(
+        modifier = Modifier
+            .padding(8.dp, bottom = 12.dp)
+            .fillMaxWidth()
+            .clickable { onClick()
+                video(movie)
+            }
+    ) {
+
+        SubcomposeAsyncImage(model ="https://image.tmdb.org/t/p/w500/${movie.poster_path}" ,
+            contentDescription = null, loading = { CircularProgressIndicator()})
+        var currentRating by remember { mutableStateOf(0f) }
+        Spacer(modifier = Modifier.height(4.dp))
+
+        RatingBar(
+            rating = movie.vote_average.toFloat(),
+            maxRating = 5,
+            onRatingChanged = { newRating ->
+                currentRating = newRating
+            }
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = movie.title,
+            style = TextStyle(fontWeight = FontWeight.Bold),
+            modifier = Modifier.fillMaxWidth().padding(4.dp),
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.ExtraBold
+        )
+    }
+}
+
 
 @Composable
 fun RatingBar(
