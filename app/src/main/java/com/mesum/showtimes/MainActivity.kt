@@ -104,6 +104,7 @@ class MainActivity : ComponentActivity() {
                                     onClearClick = {
                                         // Handle clear click
                                         isSearchBarVisible = false
+                                        viewModel.searchMovies("")
                                         navController.navigateUp()
                                     },
                                     onNavigateBack = {

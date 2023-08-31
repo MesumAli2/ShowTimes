@@ -60,7 +60,7 @@ fun SearchMoviesScreen(
 ) {
 
     val searchMoviesState by viewModel.searchMoviesState.collectAsState()
-    val movieList = searchMoviesState
+    val movieList = searchMoviesState?.filter { it.poster_path?.isNotEmpty() == true } ?: emptyList()
    val searchText by viewModel.stringState.collectAsState()
 
 
