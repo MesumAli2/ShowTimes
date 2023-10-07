@@ -9,10 +9,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mesum.showtimes.data.MovieRepository
+import com.mesum.showtimes.data.MoviesResult
+import com.mesum.showtimes.data.NetworkStatus
 import com.mesum.showtimes.data.PageInfo
 import com.mesum.showtimes.data.Result
 import com.mesum.showtimes.data.ResultX
 import com.mesum.showtimes.data.SearchMovies
+import com.mesum.showtimes.data.SearchMoviesResult
+import com.mesum.showtimes.data.TvResult
+import com.mesum.showtimes.data.TvResultApi
 import com.mesum.showtimes.data.Tvs
 import com.mesum.showtimes.data.YoutubeResult
 import com.mesum.showtimes.data.search.Movie
@@ -38,26 +43,26 @@ class MovieViewModel() : ViewModel() {
 
     var selectedTabIndex: MutableLiveData<Int> = MutableLiveData(0)
     private val movieRepository: MovieRepository = MovieRepository()
-    private val _trendingMoviesState: MutableStateFlow<List<com.mesum.showtimes.data.Result>> =
+    private val _trendingMoviesState: MutableStateFlow<List<Result>> =
         MutableStateFlow(
             listOf()
         )
     val trendingMoviesState: StateFlow<List<Result>> = _trendingMoviesState.asStateFlow()
 
-    private val _upcomingMoviesState: MutableStateFlow<List<com.mesum.showtimes.data.Result>> =
+    private val _upcomingMoviesState: MutableStateFlow<List<Result>> =
         MutableStateFlow(
             listOf()
         )
     val upcomingMoviesState: StateFlow<List<Result>> = _upcomingMoviesState.asStateFlow()
 
-    private val _popularMoviesState: MutableStateFlow<List<com.mesum.showtimes.data.Result>> =
+    private val _popularMoviesState: MutableStateFlow<List<Result>> =
         MutableStateFlow(
             listOf()
         )
     val popularMoviesState: StateFlow<List<Result>> = _popularMoviesState.asStateFlow()
 
 
-    private val _topRatedMoviesState: MutableStateFlow<List<com.mesum.showtimes.data.Result>> =
+    private val _topRatedMoviesState: MutableStateFlow<List<Result>> =
         MutableStateFlow(
             listOf()
         )
@@ -117,24 +122,35 @@ class MovieViewModel() : ViewModel() {
     private var popularPage = 1 // Keep track of the current page
     private var topRatedPage = 1 // Keep track of the current page
     private var searchPage = 1
-
+    private val _networkStatus : MutableStateFlow<NetworkStatus> = MutableStateFlow(NetworkStatus.Connected)
+    val networkStatus : StateFlow<NetworkStatus> = _networkStatus.asStateFlow()
 
     init {
         fetchTrendingMovies()
 
     }
 
+
     fun fetchTrendingMovies() {
         viewModelScope.launch {
             try {
                 val result = movieRepository.getTrendingMovies(currentTrendingPage)
-                val currentList = trendingMoviesState.value
-                val updatedList = currentList + result.results
-                currentTrendingPage++
-                _trendingMoviesState.value = updatedList
-            }catch (e : Exception){
+                when (result) {
+                    is MoviesResult.Success -> {
+                        val currentList = trendingMoviesState.value
+                        val updatedList = currentList + result.movies.results
+                        currentTrendingPage++
+                        _trendingMoviesState.value = updatedList
+                        _networkStatus.value = NetworkStatus.Connected // Update network status on success
+                    }
+                    is MoviesResult.Error -> {
+                        Log.d("ExceptionIsApi", "Error: ${result.errorMessage}")
+                        _networkStatus.value = NetworkStatus.Disconnected // Update network status on error
+                    }
+                }
+            } catch (e: Exception) {
                 Log.d("ExceptionIs", e.message.toString())
-
+                _networkStatus.value = NetworkStatus.Disconnected // Update network status on exception
             }
         }
     }
@@ -143,98 +159,142 @@ class MovieViewModel() : ViewModel() {
         viewModelScope.launch {
             try {
                 val result = movieRepository.getUpcomingMovies(upcomingPage)
-                val currentList = upcomingMoviesState.value
-                val updatedList = currentList + result.results
-                upcomingPage++
-                _upcomingMoviesState.value = updatedList
-            }catch (e: Exception){
+                when (result) {
+                    is MoviesResult.Success -> {
+                        val currentList = upcomingMoviesState.value
+                        val updatedList = currentList + result.movies.results
+                        upcomingPage++
+                        _upcomingMoviesState.value = updatedList
+                        _networkStatus.value = NetworkStatus.Connected // Update network status on success
+                    }
+                    is MoviesResult.Error -> {
+                        Log.d("ExceptionIsApi", "Error: ${result.errorMessage}")
+                        _networkStatus.value = NetworkStatus.Disconnected // Update network status on error
+                    }
+                }
+            } catch (e: Exception) {
                 Log.d("ExceptionIs", e.message.toString())
-
+                _networkStatus.value = NetworkStatus.Disconnected // Update network status on exception
             }
         }
     }
-
 
     fun fetchPopularMovies() {
         viewModelScope.launch {
             try {
                 val result = movieRepository.getPopularMovies(popularPage)
-                val currentList = popularMoviesState.value
-                val updatedList = currentList + result.results
-                popularPage++
-                _popularMoviesState.value = updatedList
-            }catch (e : Exception){
-                Log.d("ExceptionIs", e.message.toString())
-
-            }
-        }
-
-    }
-
-    fun fetchTopRatedMovies() {
-        viewModelScope.launch {
-            try {
-                val result = movieRepository.getTopRatedMovies(topRatedPage)
-                val currentList = topRatedMoviesState.value
-                val updatedList = currentList + result.results
-                topRatedPage++
-                _topRatedMoviesState.value = updatedList
-            }catch (e : Exception){
-                Log.d("ExceptionIs", e.message.toString())
-            }
-        }
-
-    }
-
-    fun searchMovies(query: String) {
-
-        stringValue.value = query
-        viewModelScope.launch {
-            try {
-                val currentKeyword = _stringState.value
-                if (query == currentKeyword) {
-                    searchPage++
-                    Log.d("CurrentWordCheck", "its a old page but paginating")
-                } else {
-                    searchPage = 1
-                    Log.d("CurrentWordCheck", "its a new page ")
-
+                when (result) {
+                    is MoviesResult.Success -> {
+                        val currentList = popularMoviesState.value
+                        val updatedList = currentList + result.movies.results
+                        popularPage++
+                        _popularMoviesState.value = updatedList
+                        _networkStatus.value = NetworkStatus.Connected // Update network status on success
+                    }
+                    is MoviesResult.Error -> {
+                        Log.d("ExceptionIsApi", "Error: ${result.errorMessage}")
+                        _networkStatus.value = NetworkStatus.Disconnected // Update network status on error
+                    }
                 }
-
-
-                val result = movieRepository.searchMovies(
-                    currentTrendingPage = searchPage,
-                    query = query
-                )
-
-                val currentList = _searchMoviesState.value.orEmpty()
-                val updatedList = if (query == currentKeyword) {
-                    currentList + result.results
-                } else {
-                    result.results
-                }
-                Log.d("SearchText", _searchMoviesState.value.toString())
-
-
-                _searchMoviesState.value = updatedList
-                _stringState.value = query
-
             } catch (e: Exception) {
-                Log.d("MoviesResponse", e.message.toString())
+                Log.d("ExceptionIs", e.message.toString())
+                _networkStatus.value = NetworkStatus.Disconnected // Update network status on exception
             }
         }
     }
 
     fun fetchTrendingTvShows() {
         viewModelScope.launch {
-            val result = movieRepository.getTrendingTvs(topRatedPage)
-            val currentList = trendingTvState.value
-            val updatedList = currentList + result.results
-            topRatedPage++
-            _trendingTvState.value = updatedList
+            try {
+                val result = movieRepository.getTrendingTvs(topRatedPage)
+                when (result) {
+                    is TvResultApi.Success -> {
+                        val currentList = trendingTvState.value
+                        val updatedList = currentList + result.movies.results
+
+                        topRatedPage++
+                        _trendingTvState.value = updatedList
+                        _networkStatus.value = NetworkStatus.Connected // Update network status on success
+                    }
+                    is TvResultApi.Error -> {
+                        Log.d("ExceptionIsApi", "Error: ${result.errorMessage}")
+                        _networkStatus.value = NetworkStatus.Disconnected // Update network status on error
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d("ExceptionIs", e.message.toString())
+                _networkStatus.value = NetworkStatus.Disconnected // Update network status on exception
+            }
+        }
+    }
+
+    fun searchMovies(query: String) {
+        stringValue.value = query
+        viewModelScope.launch {
+            try {
+                val currentKeyword = _stringState.value
+                //check and updates the page count to be sent to the api
+                if (query == currentKeyword) {
+                    searchPage++
+                    Log.d("CurrentWordCheck", "It's an old page but paginating")
+                } else {
+                    searchPage = 1
+                    Log.d("CurrentWordCheck", "It's a new page")
+                }
+                val result = movieRepository.searchMovies(currentTrendingPage = searchPage, query = query)
+                when (result) {
+                    is SearchMoviesResult.Success -> {
+                        val currentList = _searchMoviesState.value.orEmpty()
+                        //paginates if query remains same
+                        val updatedList = if (query == currentKeyword) {
+                            currentList + result.movies.results
+                        } else {
+                            result.movies.results
+                        }
+                        Log.d("SearchText", _searchMoviesState.value.toString())
+                        _searchMoviesState.value = updatedList
+                        _stringState.value = query
+                        _networkStatus.value = NetworkStatus.Connected // Update network status on success
+                    }
+                    is SearchMoviesResult.Error -> {
+                        Log.d("MoviesResponse", "Error: ${result.errorMessage}")
+                        _networkStatus.value = NetworkStatus.Disconnected // Update network status on error
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d("MoviesResponse", e.message.toString())
+                _networkStatus.value = NetworkStatus.Disconnected // Update network status on exception
+            }
+        }
+    }
+
+
+    fun fetchTopRatedMovies() {
+        viewModelScope.launch {
+            try {
+                val result = movieRepository.getTopRatedMovies(topRatedPage)
+                when(result){
+                   is MoviesResult.Success ->{
+                        val currentList = topRatedMoviesState.value
+                        val updatedList = currentList + result.movies.results
+                        topRatedPage++
+                        _topRatedMoviesState.value = updatedList
+                       _networkStatus.value = NetworkStatus.Connected
+                    }
+                    is MoviesResult.Error ->{
+                        Log.d("ExceptionIsApi", "Error: ${result.errorMessage}")
+                      _networkStatus.value =  NetworkStatus.Disconnected
+                    }
+
+                }
+
+            }catch (e : Exception){
+                Log.d("ExceptionIs", e.message.toString())
+            }
         }
 
     }
+
 
 
     fun fetchVideo(query: String) {

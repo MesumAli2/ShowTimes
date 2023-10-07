@@ -1,10 +1,10 @@
-package com.mesum.showtimes.ui.theme
+package com.mesum.showtimes.presentation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,18 +15,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,11 +37,11 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.mesum.showtimes.R
+import com.mesum.showtimes.data.NetworkStatus
 import com.mesum.showtimes.data.ResultX
+import com.mesum.showtimes.ui.theme.MovieViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
     ExperimentalComposeUiApi::class
@@ -64,28 +60,41 @@ fun SearchMoviesScreen(
    val searchText by viewModel.stringState.collectAsState()
 
 
+    val networkStatus by viewModel.networkStatus.collectAsState()
 
-    Column(
-    ) {
+    when(networkStatus){
+        is NetworkStatus.Connected ->{
+            Column(
+            ) {
 
-        // Lazy vertical grid
-        LazyVerticalGrid(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            horizontalArrangement = Arrangement.Center,
-            columns = GridCells.Fixed(2)
-        ) {
-            movieList?.size?.let {
-                items(it) {
-                    if (it == movieList.size - 1) {
-                        viewModel.searchMovies(searchText)
+                // Lazy vertical grid
+                LazyVerticalGrid(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    horizontalArrangement = Arrangement.Center,
+                    columns = GridCells.Fixed(2)
+                ) {
+                    movieList?.size?.let {
+                        items(it) {
+                            if (it == movieList.size - 1) {
+                                viewModel.searchMovies(searchText)
+                            }
+                            MovieGridItemX(movie = movieList[it], onMovieClicked, video)
+                        }
                     }
-                      MovieGridItemX(movie = movieList[it], onMovieClicked, video)
                 }
             }
         }
+        is NetworkStatus.Disconnected ->{
+            NoInternetConnectionScreen {
+                viewModel.searchMovies(searchText)
+            }
+        }
     }
+
+
+
 }
 
 
@@ -105,10 +114,10 @@ fun SearchBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
 
-
-
-
-
+    // Access the NavController
+    BackHandler(true) {
+        onNavigateBack()
+    }
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -131,9 +140,7 @@ fun SearchBar(
                     imageVector = Icons.Default.Search,
                     contentDescription = null
                 )
-            }
-            
-            ,
+            },
             trailingIcon = {
                 AnimatedVisibility(
                     visible = showClearButton,
@@ -141,14 +148,12 @@ fun SearchBar(
                     exit = fadeOut()
                 ) {
                     IconButton(onClick = { onClearClick()
-
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Close,
                             contentDescription = null
                         )
                     }
-
                 }
             },
             maxLines = 1,
@@ -157,12 +162,8 @@ fun SearchBar(
             keyboardActions = KeyboardActions(onDone = {
                 keyboardController?.hide()
             }),
-
             shape =
                 RoundedCornerShape(10.dp),
-
-
-
         )
 
 

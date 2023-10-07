@@ -6,3 +6,8 @@ data class SearchMovies(
     val total_pages: Int,
     val total_results: Int
 )
+
+sealed class SearchMoviesResult {
+    data class Success(val movies: SearchMovies) : SearchMoviesResult()
+    data class Error(val errorMessage: String) : SearchMoviesResult()
+}

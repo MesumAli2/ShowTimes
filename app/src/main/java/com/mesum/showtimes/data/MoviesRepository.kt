@@ -7,82 +7,90 @@ import com.mesum.showtimes.network.RetrofitInstance
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
+import java.io.IOException
 
 
 class MovieRepository {
     private val apiKey : String = "72a92a904702629a345d21c3e4fe58ed"
     private val movieApiService = RetrofitInstance.retrofit.create(MovieApiService::class.java)
 
-
-
-
-    suspend fun getTrendingMovies( currentTrendingPage: Int): Movies {
-        return withContext(Dispatchers.IO) {
-            try {
-                val response = movieApiService.getTrendingMovies(apiKey, page = currentTrendingPage.toString())
-                response
-            } catch (e : HttpException){
-                Movies(0, listOf(),0,0)
-            }
-        }
-    }
-
-
-    suspend fun getTopRatedMovies( currentTrendingPage: Int): Movies {
+    suspend fun getTopRatedMovies( currentTrendingPage: Int): MoviesResult {
         return withContext(Dispatchers.IO) {
             try {
                 val response = movieApiService.getTopRatedMovies(apiKey, page = currentTrendingPage)
-                response
+                MoviesResult.Success(response)
             } catch (e : HttpException){
-                Movies(0, listOf(),0,0)
+                MoviesResult.Error("http error ${e.code()}")
+
+            }catch (e : IOException){
+                MoviesResult.Error("Network error ${e.message}")
+
             }
         }
     }
 
-    suspend fun getPopularMovies( currentTrendingPage: Int): Movies {
+
+    suspend fun getTrendingMovies(currentTrendingPage: Int): MoviesResult {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = movieApiService.getTrendingMovies(apiKey, page = currentTrendingPage.toString())
+                MoviesResult.Success(response)
+            } catch (e: HttpException) {
+                MoviesResult.Error("HTTP Error: ${e.code()}")
+            } catch (e: IOException) {
+                MoviesResult.Error("Network Error: ${e.message}")
+            }
+        }
+    }
+
+    suspend fun getPopularMovies(currentTrendingPage: Int): MoviesResult {
         return withContext(Dispatchers.IO) {
             try {
                 val response = movieApiService.getPopularMovies(apiKey, page = currentTrendingPage)
-                response
-            } catch (e : HttpException){
-                Movies(0, listOf(),0,0)
+                MoviesResult.Success(response)
+            } catch (e: HttpException) {
+                MoviesResult.Error("HTTP Error: ${e.code()}")
+            } catch (e: IOException) {
+                MoviesResult.Error("Network Error: ${e.message}")
             }
         }
     }
 
-
-    suspend fun getUpcomingMovies( currentTrendingPage: Int): Movies {
+    suspend fun getUpcomingMovies(currentTrendingPage: Int): MoviesResult {
         return withContext(Dispatchers.IO) {
             try {
                 val response = movieApiService.getUpcomoingMovies(apiKey, page = currentTrendingPage)
-                response
-            } catch (e : HttpException){
-                Movies(0, listOf(),0,0)
+                MoviesResult.Success(response)
+            } catch (e: HttpException) {
+                MoviesResult.Error("HTTP Error: ${e.code()}")
+            } catch (e: IOException) {
+                MoviesResult.Error("Network Error: ${e.message}")
             }
         }
     }
 
-    suspend fun getTrendingTvs(currentTrendingPage: Int): TvResult {
+    suspend fun getTrendingTvs(currentTrendingPage: Int): TvResultApi {
         return withContext(Dispatchers.IO) {
             try {
                 val response = movieApiService.getTrendingTvs(apiKey, page = currentTrendingPage)
-                response
-            } catch (e : HttpException){
-                TvResult(0, listOf(),0,0)
+                TvResultApi.Success(response)
+            } catch (e: HttpException) {
+                TvResultApi.Error("HTTP Error: ${e.code()}")
+            } catch (e: IOException) {
+                TvResultApi.Error("Network Error: ${e.message}")
             }
         }
     }
-    suspend fun searchMovies(currentTrendingPage: Int, query : String): SearchMovies{
-        return withContext(Dispatchers.IO){
+
+    suspend fun searchMovies(currentTrendingPage: Int, query: String): SearchMoviesResult {
+        return withContext(Dispatchers.IO) {
             try {
-                val response = movieApiService.searchMoviess(apiKey = apiKey, page =currentTrendingPage, query = query )
-                Log.d("RespSearch", response.toString())
-
-                response
-            }catch (e : HttpException){
-                Log.d("RespSearch", "Error response ${e.toString().toString()}")
-
-                SearchMovies(0, listOf(),0,0)
+                val response = movieApiService.searchMoviess(apiKey = apiKey, page = currentTrendingPage, query = query)
+                SearchMoviesResult.Success(response)
+            } catch (e: HttpException) {
+                SearchMoviesResult.Error("HTTP Error: ${e.code()}")
+            } catch (e: IOException) {
+                SearchMoviesResult.Error("Network Error: ${e.message}")
             }
         }
     }
